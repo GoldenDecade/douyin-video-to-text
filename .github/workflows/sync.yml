@@ -1,0 +1,37 @@
+name: Upstream Sync
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 每天凌晨0点运行
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  sync_latest_from_upstream:
+    runs-on: ubuntu-latest
+    name: Sync latest commits from upstream repo
+
+    steps:
+    # 第一步：检出你的代码
+    - name: Checkout target repo
+      uses: actions/checkout@v3
+      with:
+        ref: main
+        persist-credentials: false
+
+    # 第二步：同步上游
+    - name: Sync upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
+      with:
+        target_sync_branch: main
+        # 目标仓库，即你的 Fork 仓库
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        # 上游仓库源地址
+        upstream_sync_branch: main
+        upstream_sync_repo: huhetingadday-boop/douyin-video-to-text
+
+    # 第三步：输出同步结果，帮助调试
+    - name: Sync check
+      if: success()
+      run: |
+        echo "Sync status: Success"
